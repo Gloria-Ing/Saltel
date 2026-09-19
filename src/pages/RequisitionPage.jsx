@@ -3,7 +3,7 @@ import { useApp } from '../contexts/AppContext';
 import { USERS, SITES, FMT_RWF } from '../data/mockData';
 import { Card, PageHeader, Badge, Btn, SectionTitle, Input, Textarea, EmptyState, Modal, Table, AlertBanner } from '../components/UI';
 
-// v10: Tech enters ALL fees at once → Supervisor reviews → Accountant/DAF pays
+// v10: Tech enters ALL fees at once → RC Reviews → Accountant/DAF pays
 // NO TL step. DAF sees only daily totals. Only accountant sees individual details.
 
 export default function RequisitionPage() {
@@ -72,16 +72,16 @@ export default function RequisitionPage() {
     if (!matchSearch || !matchDate) return false;
 
     if (role==='technician') return req.technician_id===currentUser.id;
-    if (role==='hod') {
+    if (role=== 'regional_coordinator') {
       const t = tasks.find(t=>t.id===req.task_id);
       return t?.hod_id===currentUser.id;
     }
-    if (role==='accountant') return true;
+    if (role=== 'maximization_officer') return true;
     if (role==='daf') return req.status==='approved'||req.status==='paid';
     return true;
   });
 
-  const pendingForHoU = role==='hod'
+  const pendingForHoU = role=== 'regional_coordinator'
     ? visibleReqs.filter(r=>r.status==='pending')
     : [];
 
@@ -112,8 +112,8 @@ export default function RequisitionPage() {
   const rows = visibleReqs.map(req => {
     const task = tasks.find(t=>t.id===req.task_id);
     const tech = USERS.find(u=>u.id===req.technician_id);
-    const canHoUReview = role==='hod' && req.status==='pending';
-    const canPay       = role==='accountant' && req.status==='approved';
+    const canRCReview = role=== 'regional_coordinator' && req.status==='pending';
+    const canPay       = role=== 'maximization_officer' && req.status==='approved';
     const transport_amt = req.items?.find(i=>i.label.toLowerCase().includes('transport'))?.amount||0;
     const meals_amt     = req.items?.find(i=>i.label.toLowerCase().includes('meal'))?.amount||0;
     const lodging_amt   = req.items?.find(i=>i.label.toLowerCase().includes('lodging'))?.amount||0;
@@ -133,7 +133,7 @@ export default function RequisitionPage() {
       <span style={{ fontSize:11, color:'var(--text3)' }}>{req.created_at?new Date(req.created_at).toLocaleDateString('en-RW'):'—'}</span>,
       <div style={{ display:'flex', gap:4 }}>
         <Btn size="sm" variant="ghost" onClick={()=>setViewReq(req)}>View</Btn>
-        {canHoUReview && <Btn size="sm" variant="primary" onClick={()=>setReviewModal({...req})}>Review</Btn>}
+        {canRCReview && <Btn size="sm" variant="primary" onClick={()=>setReviewModal({...req})}>Review</Btn>}
         {canPay       && <Btn size="sm" variant="success" onClick={()=>payRequisition(req.id)}>Mark Paid</Btn>}
       </div>
     ];
@@ -157,7 +157,7 @@ export default function RequisitionPage() {
         }
         action={
           role==='technician' ? <Btn variant="primary" onClick={()=>setShowForm(true)}>＋ New Requisition</Btn> :
-          role==='accountant' && requisitions.filter(r=>r.status==='approved').length>0
+          role=== 'maximization_officer' && requisitions.filter(r=>r.status==='approved').length>0
             ? <Btn variant="success" onClick={()=>{ setAutoPayIds(requisitions.filter(r=>r.status==='approved').map(r=>r.id)); setAutoPayDone(false); setAutoPayRefs([]); setShowAutoPay(true); }}>⚡ Auto-Pay All</Btn>
             : null
         }
@@ -165,10 +165,10 @@ export default function RequisitionPage() {
 
       {role==='technician' && (
         <AlertBanner color="var(--primary)" bg="var(--primary-l)" border="var(--primary)">
-          📌 Submit ALL your field expenses (transport, meals, lodging) in one requisition. Your request goes directly to your Supervisor for review.
+          📌 Submit ALL your field expenses (transport, meals, lodging) in one requisition. Your request goes directly to your Regional Coordinator for review.
         </AlertBanner>
       )}
-      {role==='hod' && pendingForHoU.length > 0 && (
+      {role=== 'regional_coordinator' && pendingForHoU.length > 0 && (
         <AlertBanner color="var(--primary)" bg="var(--primary-l)" border="var(--primary)">
           🔔 {pendingForHoU.length} requisition(s) awaiting your review.
         </AlertBanner>
@@ -223,7 +223,7 @@ export default function RequisitionPage() {
       {/* ─── ACCOUNTANT + HoU + Technician VIEW: Individual Requisitions ─── */}
       {!isDaf && (
         <>
-          {['hod','accountant','ceo'].includes(role) && (
+          {['regional_coordinator','maximization_officer','ceo'].includes(role) && (
             <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'1rem', marginBottom:'1.5rem' }}>
               {[
                 { label:'Total Requested', value:FMT_RWF(totals.total), color:'var(--primary)' },
@@ -244,7 +244,7 @@ export default function RequisitionPage() {
             {role!=='technician' && (
               <input type="text" value={dateFilter} onChange={e=>setDateFilter(e.target.value)} placeholder="Filter by date..." style={{ width:160, padding:'9px 14px', border:'1.5px solid var(--border)', borderRadius:9, background:'var(--bg2)', fontSize:14 }}/>
             )}
-            {role==='accountant' && selectedIds.length>0 && (
+            {role=== 'maximization_officer' && selectedIds.length>0 && (
               <Btn variant="success" onClick={()=>{ bulkPayRequisitions(selectedIds); setSelectedIds([]); }}>💳 Pay {selectedIds.length} Selected</Btn>
             )}
           </div>
@@ -258,7 +258,7 @@ export default function RequisitionPage() {
           </Card>
 
           {/* Footer totals row */}
-          {visibleReqs.length>0 && ['hod','accountant','ceo'].includes(role) && (
+          {visibleReqs.length>0 && ['regional_coordinator','maximization_officer','ceo'].includes(role) && (
             <div style={{ display:'flex', gap:'1rem', padding:'12px 16px', background:'var(--bg3)', borderRadius:10, marginTop:8, fontSize:13 }}>
               <span style={{ fontWeight:600, color:'var(--text3)', marginRight:'auto' }}>Totals ({visibleReqs.length} records)</span>
               <span>🚗 {FMT_RWF(totals.transport)}</span>
@@ -273,7 +273,7 @@ export default function RequisitionPage() {
       {/* ── Submit Form Modal ── */}
       <Modal open={showForm} onClose={()=>setShowForm(false)} title="🧾 Submit Fee Requisition" maxWidth={560}>
         <AlertBanner>
-          📝 Enter ALL your field expenses in one submission. Goes directly to your Supervisor for approval.
+          📝 Enter ALL your field expenses in one submission. Goes directly to your Regional Coordinator for approval.
         </AlertBanner>
         <div style={{ marginBottom:'1rem' }}>
           <label style={{ display:'block', fontSize:13, fontWeight:600, color:'var(--text2)', marginBottom:5 }}>Select Task *</label>
@@ -342,9 +342,9 @@ export default function RequisitionPage() {
         );
       })()}
 
-      {/* ── HoU Review Modal ── */}
+      {/* ── RC Review Modal ── */}
       {reviewModal && (
-        <Modal open={true} onClose={()=>setReviewModal(null)} title={`Supervisor Review — ${reviewModal.id}`} maxWidth={480}>
+        <Modal open={true} onClose={()=>setReviewModal(null)} title={`RC Review — ${reviewModal.id}`} maxWidth={480}>
           <div style={{ padding:'12px 14px', background:'var(--bg3)', borderRadius:10, marginBottom:'1rem' }}>
             <div style={{ fontWeight:700, marginBottom:4 }}>{tasks.find(t=>t.id===reviewModal.task_id)?.title}</div>
             <div style={{ fontSize:13, color:'var(--text3)' }}>
@@ -382,7 +382,7 @@ export default function RequisitionPage() {
       )}
 
       {/* ── Auto-Pay All Modal (Accountant) ── */}
-      {showAutoPay && role==='accountant' && (() => {
+      {showAutoPay && role=== 'maximization_officer' && (() => {
         const approvedReqs = requisitions.filter(r=>r.status==='approved');
         const selectedReqs = approvedReqs.filter(r=>autoPayIds.includes(r.id));
         const total = selectedReqs.reduce((s,r)=>s+r.total,0);

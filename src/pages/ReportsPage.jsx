@@ -123,8 +123,8 @@ export default function ReportsPage() {
   const filtered = [...reports].sort((a,b)=>new Date(b.submitted_at)-new Date(a.submitted_at)).filter(r => {
     const task = tasks.find(t=>t.id===r.task_id);
     if (role==='technician')    return r.technician_id===currentUser.id;
-    if (role==='team_leader')   return task?.leader_id===currentUser.id;
-    if (role==='hod')           return task?.hod_id===currentUser.id;
+    if (role=== 'unit_leader')   return task?.leader_id===currentUser.id;
+    if (role=== 'regional_coordinator')           return task?.hod_id===currentUser.id;
     return true;
   }).filter(r => {
     const task = tasks.find(t=>t.id===r.task_id);
@@ -144,13 +144,13 @@ export default function ReportsPage() {
     }).filter(x=>x.missingIds.length>0);
   };
 
-  const canViewCheckins = ['ceo','hod','team_leader'].includes(role);
+  const canViewCheckins = ['ceo','regional_coordinator','unit_leader'].includes(role);
 
   const TABS = [
-    { k:'list',    l:'📋 Reports',   roles:['ceo','hod','team_leader','technician','accountant'] },
+    { k:'list',    l:'📋 Reports',   roles:['ceo','regional_coordinator','unit_leader','technician','maximization_officer'] },
     { k:'submit',  l:'➕ Submit',    roles:['technician'] },
-    { k:'missing', l:'⚠ Missing',   roles:['team_leader','hod'] },
-    { k:'checkins',l:'📍 Check-ins', roles:['ceo','hod','team_leader'] },
+    { k:'missing', l:'⚠ Missing',   roles:['unit_leader','regional_coordinator'] },
+    { k:'checkins',l:'📍 Check-ins', roles:['ceo','regional_coordinator','unit_leader'] },
   ].filter(t=>t.roles.includes(role));
 
   const handleGPS = () => {
@@ -208,8 +208,8 @@ export default function ReportsPage() {
   const allCheckins = [...checkins].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
   const filteredCheckins = allCheckins.filter(c => {
     const task = tasks.find(t=>t.id===c.task_id);
-    if (role==='hod') return task?.hod_id===currentUser.id;
-    if (role==='team_leader') return task?.leader_id===currentUser.id;
+    if (role=== 'regional_coordinator') return task?.hod_id===currentUser.id;
+    if (role=== 'unit_leader') return task?.leader_id===currentUser.id;
     return true;
   });
 
@@ -474,7 +474,7 @@ export default function ReportsPage() {
       )}
 
       {/* ── MISSING REPORTS TAB ── */}
-      {viewTab==='missing' && ['team_leader','hod'].includes(role) && (
+      {viewTab==='missing' && ['unit_leader','regional_coordinator'].includes(role) && (
         <div>
           {getMissing().length===0 ? (
             <EmptyState icon="✓" title="All reports submitted today" body="No missing reports for active tasks"/>
@@ -543,8 +543,8 @@ export default function ReportsPage() {
         const task = tasks.find(t=>t.id===viewReport.task_id);
         const tech = USERS.find(u=>u.id===viewReport.technician_id);
         const site = SITES.find(s=>s.id===task?.site_id);
-        const canApprove = (role==='hod'||role==='team_leader') && viewReport.status==='pending' && task?.hod_id===currentUser.id;
-        const canFlag    = (role==='hod'||role==='team_leader') && !viewReport.late_flagged;
+        const canApprove = (role=== 'regional_coordinator'||role=== 'unit_leader') && viewReport.status==='pending' && task?.hod_id===currentUser.id;
+        const canFlag    = (role=== 'regional_coordinator'||role=== 'unit_leader') && !viewReport.late_flagged;
         return (
           <Modal open={true} onClose={()=>{ setViewReport(null); setFeedback(''); }} title={`Report ${viewReport.id}`} maxWidth={680}>
             <div style={{ display:'flex', gap:8, marginBottom:'1rem', flexWrap:'wrap' }}>

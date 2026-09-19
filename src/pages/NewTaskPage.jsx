@@ -117,7 +117,7 @@ export default function NewTaskPage() {
                 ))}
               </div>
             )}
-            {currentUser?.role==='hod' && (
+            {currentUser?.role=== 'regional_coordinator' && (
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {[
                   { step:1, label:'HoU creates task', active:true },

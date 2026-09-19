@@ -119,7 +119,7 @@ const findAnswer = (text, role) => {
   if (lower.includes('lan')||lower.includes('switch')||lower.includes('network')) return QA_TECHNICIAN[10].a;
   if (lower.includes('auto-pay')||lower.includes('autopay')||lower.includes('bulk pay')) return QA_ACCOUNTANT[1].a;
   if (lower.includes('kpi')||lower.includes('financial')) return (ROLE_QA_MAP[role]||QA_ALL).find(q=>q.q.toLowerCase().includes('kpi'))?.a || QA_DAF[4].a;
-  return `I don't have a specific answer for that in my database, but I can help with anything related to SALTEL FOMS — reports, tasks, fees, salary, leave, and ${['technician','team_leader'].includes(role)?'LAN/Fiber/CCTV field guidance':['accountant','daf'].includes(role)?'financial management and controls':'operations management'}. Try rephrasing or tap a quick question below.`;
+  return `I don't have a specific answer for that in my database, but I can help with anything related to SALTEL FOMS — reports, tasks, fees, salary, leave, and ${['technician','unit_leader'].includes(role)?'LAN/Fiber/CCTV field guidance':['maximization_officer','daf'].includes(role)?'financial management and controls':'operations management'}. Try rephrasing or tap a quick question below.`;
 };
 
 export default function AIAssistantPage() {
@@ -128,9 +128,9 @@ export default function AIAssistantPage() {
   const [messages, setMessages] = useState([
     { from:'ai', text:`Hello ${currentUser?.name?.split(' ')[0] || 'there'}! 👋 I'm your SALTEL FOMS assistant. ${
       role === 'technician' ? "I can answer questions about reports, GPS, field tasks, fees, salary, leave, and technical guidance for LAN, Fiber, and CCTV work." :
-      role === 'team_leader' ? "I can help with task assignment, team management, report review, technical guidance, and field operations." :
-      role === 'hod' ? "I can assist with task management, leader assignment, report oversight, fee requisitions, and team supervision." :
-      role === 'accountant' ? "I can help with requisition processing, Auto-Pay, payment controls, financial reconciliation, and expense analysis." :
+      role === 'unit_leader' ? "I can help with task assignment, team management, report review, technical guidance, and field operations." :
+      role === 'regional_coordinator' ? "I can assist with task management, leader assignment, report oversight, fee requisitions, and team supervision." :
+      role === 'maximization_officer' ? "I can help with requisition processing, Auto-Pay, payment controls, financial reconciliation, and expense analysis." :
       role === 'daf' ? "I can help with financial oversight, salary management, budget KPIs, financial anomaly detection, and cost optimization advice." :
       "I can help with all aspects of SALTEL FOMS operations." } What would you like to know?`
     }
@@ -169,7 +169,7 @@ export default function AIAssistantPage() {
       <PageHeader
         title="🤖 AI Assistant"
         subtitle={<span>Smart assistant for <span className="saltel-brand" style={{ fontSize:13 }}>SALTEL</span> FOMS — role-tailored answers for {
-          role==='technician'?'Field Technicians':role==='team_leader'?'HoU (Leaders)':role==='hod'?'Supervisors':role==='accountant'?'Accountants':role==='daf'?'Finance & Admin':'All Roles'}</span>}
+          role==='technician'?'Field Technicians':role=== 'unit_leader'?'HoU (Leaders)':role=== 'regional_coordinator'?'Supervisors':role=== 'maximization_officer'?'Accountants':role==='daf'?'Finance & Admin':'All Roles'}</span>}
       />
 
       <div style={{ display:'grid', gridTemplateColumns:'1fr 310px', gap:'1.5rem', alignItems:'start' }}>
@@ -179,7 +179,7 @@ export default function AIAssistantPage() {
             <div style={{ width:36, height:36, borderRadius:10, background:'linear-gradient(135deg,#169BD5,#0D8EC8)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>🤖</div>
             <div>
               <div style={{ fontSize:14, fontWeight:700 }}><span className="saltel-brand" style={{ fontSize:13 }}>SALTEL</span> Assistant</div>
-              <div style={{ fontSize:11, color:'var(--green)', fontWeight:600 }}>● Online · Role: {role==='technician'?'Technician':role==='team_leader'?'HoU':role==='hod'?'Supervisor':role==='accountant'?'Accountant':role==='daf'?'DAF':'All'}</div>
+              <div style={{ fontSize:11, color:'var(--green)', fontWeight:600 }}>● Online · Role: {role==='technician'?'Technician':role=== 'unit_leader'?'HoU':role=== 'regional_coordinator'?'Supervisor':role=== 'maximization_officer'?'maximization_officer':role==='daf'?'DAF':'All'}</div>
             </div>
           </div>
 

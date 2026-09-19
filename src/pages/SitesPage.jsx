@@ -6,7 +6,7 @@ import { Card, PageHeader, SectionTitle, Badge, StatCard, Modal, Input, Btn, Ale
 export default function SitesPage() {
   const { tasks, sites, currentUser, registerSiteGlobal } = useApp();
   const role = currentUser?.role;
-  const canRegisterSite = ['ceo', 'hod'].includes(role);
+  const canRegisterSite = ['ceo', 'regional_coordinator'].includes(role);
 
   const [showAddSite, setShowAddSite] = useState(false);
   const [siteForm, setSiteForm] = useState({ name:'', location:'', province:'Kigali', type:'Corporate', rural:false, lat:'', lng:'' });
@@ -98,7 +98,7 @@ export default function SitesPage() {
       </div>
 
       {/* Register New Site Modal (CEO & Supervisor) */}
-      <Modal open={showAddSite} onClose={()=>setShowAddSite(false)} title={`📍 Register New Site${role==='hod'?' (Supervisor)':''}`} maxWidth={520}>
+      <Modal open={showAddSite} onClose={()=>setShowAddSite(false)} title={`📍 Register New Site${role=== 'regional_coordinator'?' (Supervisor)':''}`} maxWidth={520}>
         {siteSuccess && <AlertBanner type="success">{siteSuccess}</AlertBanner>}
         <div style={{ fontSize:13, color:'var(--text3)', marginBottom:'1rem' }}>Register a new deployment site for field operations.</div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>

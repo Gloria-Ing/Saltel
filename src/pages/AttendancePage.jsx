@@ -32,8 +32,8 @@ export default function AttendancePage() {
   const visible = checkins.filter(c => {
     const task = tasks.find(t => t.id === c.task_id);
     if (role === 'technician') return c.technician_id === currentUser.id;
-    if (role === 'team_leader') return task?.leader_id === currentUser.id || task?.dept === currentUser.dept;
-    if (role === 'hod') return task?.hod_id === currentUser.id || task?.dept === currentUser.dept;
+    if (role === 'unit_leader') return task?.leader_id === currentUser.id || task?.dept === currentUser.dept;
+    if (role === 'regional_coordinator') return task?.hod_id === currentUser.id || task?.dept === currentUser.dept;
     return true; // CEO, DAF, accountant see all
   });
 
@@ -82,12 +82,12 @@ export default function AttendancePage() {
 
   const visibleUsers = role === 'technician'
     ? [currentUser]
-    : users.filter(u => ['technician','team_leader'].includes(u.role) &&
-        (role === 'hod' || role === 'team_leader' ? u.dept === currentUser.dept : true));
+    : users.filter(u => ['technician','unit_leader'].includes(u.role) &&
+        (role === 'regional_coordinator' || role === 'unit_leader' ? u.dept === currentUser.dept : true));
 
   const visibleTasks = role === 'technician'
     ? tasks.filter(t => (t.technician_ids||[]).includes(currentUser.id))
-    : tasks.filter(t => role === 'hod' ? t.dept === currentUser.dept : true);
+    : tasks.filter(t => role === 'regional_coordinator' ? t.dept === currentUser.dept : true);
 
   return (
     <div style={{ fontFamily:'var(--font)' }}>
@@ -96,7 +96,7 @@ export default function AttendancePage() {
         subtitle={
           role === 'ceo'
             ? 'GPS-verified field attendance across all units'
-            : role === 'hod'
+            : role === 'regional_coordinator'
             ? `GPS attendance for your unit — ${currentUser.dept}`
             : role === 'technician'
             ? 'Your personal GPS check-in/out records'
@@ -121,12 +121,12 @@ export default function AttendancePage() {
       </div>
 
       {/* ── Unit summary cards (CEO + Supervisor) ────────────────────────────── */}
-      {['ceo','hod'].includes(role) && (
+      {['ceo','regional_coordinator'].includes(role) && (
         <div style={{ marginBottom:'1.5rem' }}>
           <SectionTitle>{role === 'ceo' ? 'Attendance by Unit (Today)' : 'Unit Attendance (Today)'}</SectionTitle>
           <div className="resp-grid-3" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem' }}>
             {activeDepts.map(dept => {
-              const deptUsers = users.filter(u => u.dept === dept.id && ['technician','team_leader'].includes(u.role));
+              const deptUsers = users.filter(u => u.dept === dept.id && ['technician','unit_leader'].includes(u.role));
               const deptCI = todayCI.filter(c => {
                 const task = tasks.find(t => t.id === c.task_id);
                 return task?.dept === dept.id;

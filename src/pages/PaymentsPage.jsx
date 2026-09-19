@@ -96,9 +96,9 @@ export default function PaymentsPage() {
   const makeRow = p => {
     const task = tasks.find(t=>t.id===p.task_id);
     const tech = USERS.find(u=>u.id===p.technician_id);
-    const canPay = (role==='accountant'||role==='daf') && p.status==='pending' && !p.disputed;
+    const canPay = (role=== 'maximization_officer'||role==='daf') && p.status==='pending' && !p.disputed;
     const canDispute = role==='technician' && p.status==='pending' && !p.disputed;
-    const canResolve = (role==='accountant'||role==='daf') && p.disputed && p.dispute_status==='open';
+    const canResolve = (role=== 'maximization_officer'||role==='daf') && p.disputed && p.dispute_status==='open';
 
     const cells = [
       <span style={{ fontFamily:'var(--mono)', fontSize:12, color:'var(--primary)' }}>{p.id}</span>,
@@ -154,7 +154,7 @@ export default function PaymentsPage() {
         subtitle="Field technician expense payments — sorted newest first"
         action={
           <div style={{ display:'flex', gap:8 }}>
-            {['accountant','daf'].includes(role) && (
+            {['maximization_officer','daf'].includes(role) && (
               <Btn variant="ghost" onClick={()=>exportPaymentsCSV(filtered,tasks)}>⬇ Export CSV</Btn>
             )}
           </div>

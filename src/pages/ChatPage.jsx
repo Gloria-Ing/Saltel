@@ -8,7 +8,7 @@ export default function ChatPage() {
   const [activeChat, setActiveChat] = useState(null);
   const [text, setText] = useState('');
 
-  const contacts = USERS.filter(u=>u.id!==currentUser.id&&['ceo','hod','team_leader','technician','accountant','daf'].includes(u.role));
+  const contacts = USERS.filter(u=>u.id!==currentUser.id&&['ceo','regional_coordinator','unit_leader','technician','maximization_officer','daf'].includes(u.role));
 
   const getConv = (uid) => messages.filter(m=>(m.from===currentUser.id&&m.to===uid)||(m.from===uid&&m.to===currentUser.id)).sort((a,b)=>new Date(a.time)-new Date(b.time));
 

@@ -6,7 +6,7 @@ import { Card, PageHeader, Btn, SectionTitle, EmptyState, Modal, Textarea, Input
 export default function AnnouncementsPage() {
   const { currentUser, announcements, myAnnouncements, createAnnouncement, users } = useApp();
   const role = currentUser?.role;
-  const canCreate = ['ceo','hod','team_leader'].includes(role);
+  const canCreate = ['ceo','regional_coordinator','unit_leader'].includes(role);
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title:'', body:'', target:'all', target_dept:currentUser?.dept||null, pinned:false });
@@ -25,8 +25,8 @@ export default function AnnouncementsPage() {
   const targetOpts = [
     { value:'all', label:'All Staff' },
     { value:'technician', label:'Technicians Only' },
-    { value:'team_leader', label:'Team Leaders Only' },
-    { value:'hod', label:'Heads of Unit Only' },
+    { value:'unit_leader', label:'Team Leaders Only' },
+    { value:'regional_coordinator', label:'Heads of Unit Only' },
   ];
 
   return (

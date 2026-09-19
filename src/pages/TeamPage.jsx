@@ -35,7 +35,7 @@ export default function TeamPage() {
   const canRegister = registrableRoles().length > 0;
   const regRoles    = registrableRoles();
   const allDepts    = departments || DEPARTMENTS;
-  const canAdmin    = ['ceo','hod'].includes(role);
+  const canAdmin    = ['ceo','regional_coordinator'].includes(role);
 
   const [rForm, setRForm] = useState({
     name:'', email:'', username:'', password:'saltel', phone:'',
@@ -117,18 +117,18 @@ export default function TeamPage() {
     const matchSearch = !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     const matchDept   = deptFilter==='all' || u.dept===deptFilter;
     const matchRole   = roleFilter==='all' || u.role===roleFilter;
-    if (role==='team_leader') return (u.dept===currentUser.dept) && matchSearch && matchDept && matchRole;
+    if (role=== 'unit_leader') return (u.dept===currentUser.dept) && matchSearch && matchDept && matchRole;
     if (role==='ceo') return matchSearch && matchDept && matchRole;
-    if (role==='hod') return (u.dept===currentUser.dept || !u.dept) && matchSearch && matchDept && matchRole;
+    if (role=== 'regional_coordinator') return (u.dept===currentUser.dept || !u.dept) && matchSearch && matchDept && matchRole;
     if (role==='daf') return matchSearch && matchDept && matchRole;
     return matchSearch && matchDept && matchRole;
   });
 
   const byDept = allDepts.reduce((acc, d) => {
-    acc[d.id] = visibleUsers.filter(u=>u.dept===d.id&&['team_leader','technician'].includes(u.role));
+    acc[d.id] = visibleUsers.filter(u=>u.dept===d.id&&['unit_leader','technician'].includes(u.role));
     return acc;
   }, {});
-  const mgmt = visibleUsers.filter(u=>['ceo','hod','daf','accountant'].includes(u.role));
+  const mgmt = visibleUsers.filter(u=>['ceo','regional_coordinator','daf','maximization_officer'].includes(u.role));
 
   const ADMIN_TABS_CEO = [
     { k:'unit', l:'➕ New Unit' },
@@ -151,8 +151,8 @@ export default function TeamPage() {
         title="👥 Team Management"
         subtitle={
           role==='ceo' ? 'Manage units, sites, supervisors, and all staff' :
-          role==='hod' ? 'Register staff and manage your unit' :
-          role==='team_leader' ? 'View your team and add technicians' :
+          role=== 'regional_coordinator' ? 'Register staff and manage your unit' :
+          role=== 'unit_leader' ? 'View your team and add technicians' :
           'View all SALTEL staff'
         }
         action={
@@ -162,7 +162,7 @@ export default function TeamPage() {
             )}
             {canRegister && (
               <Btn variant="primary" onClick={()=>setShowReg(true)}>
-                ＋ {role==='ceo'?'Register Staff':role==='hod'?'Register Staff':'Add Technician'}
+                ＋ {role==='ceo'?'Register Staff':role=== 'regional_coordinator'?'Register Staff':'Add Technician'}
               </Btn>
             )}
           </div>
@@ -194,12 +194,12 @@ export default function TeamPage() {
         </div>
       )}
 
-      {allDepts.filter(d=>role==='hod'?d.id===currentUser.dept:role==='team_leader'?d.id===currentUser.dept:true).map(dept=>(
+      {allDepts.filter(d=>role=== 'regional_coordinator'?d.id===currentUser.dept:role=== 'unit_leader'?d.id===currentUser.dept:true).map(dept=>(
         <div key={dept.id} style={{ marginBottom:'2rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:'1rem' }}>
             <div style={{ width:12, height:12, borderRadius:3, background:DEPT_COLORS[dept.id]||'var(--primary)' }}/>
             <SectionTitle>{dept.label} — {(byDept[dept.id]||[]).length} staff</SectionTitle>
-            {canRegister && (role==='hod'?dept.id===currentUser.dept:true) && (
+            {canRegister && (role=== 'regional_coordinator'?dept.id===currentUser.dept:true) && (
               <Btn size="sm" variant="ghost" style={{ marginLeft:'auto' }} onClick={()=>{ setF('dept',dept.id); setShowReg(true); }}>＋ Add</Btn>
             )}
           </div>
@@ -213,12 +213,12 @@ export default function TeamPage() {
       ))}
 
       {/* ── Register Modal ── */}
-      <Modal open={showRegModal} onClose={()=>setShowReg(false)} title={role==='ceo'?'Register New Staff Member':role==='hod'?'Register New Staff Member':'Add New Technician'} maxWidth={580}>
+      <Modal open={showRegModal} onClose={()=>setShowReg(false)} title={role==='ceo'?'Register New Staff Member':role=== 'regional_coordinator'?'Register New Staff Member':'Add New Technician'} maxWidth={580}>
         {regSuccess && (
           <AlertBanner type="success">{regSuccess}</AlertBanner>
         )}
         <div style={{ padding:'12px 16px', background:'var(--primary-l)', border:'1px solid var(--primary)', borderRadius:10, marginBottom:'1rem', fontSize:13, color:'var(--primary)', fontWeight:600 }}>
-          {role==='ceo'?'👑 As CEO, you can register technicians in any unit.':role==='hod'?'🏢 As Supervisor, you can register HoUs and Technicians for your unit.':'👑 As HoU, you can add Technicians to your team.'}
+          {role==='ceo'?'👑 As CEO, you can register technicians in any unit.':role=== 'regional_coordinator'?'🏢 As Supervisor, you can register HoUs and Technicians for your unit.':'👑 As HoU, you can add Technicians to your team.'}
         </div>
 
         <SectionTitle>Personal Info</SectionTitle>
@@ -310,7 +310,7 @@ export default function TeamPage() {
         {/* New Site (CEO + Supervisor/hod) */}
         {adminTab==='site' && (
           <div>
-            <div style={{ fontSize:13, color:'var(--text3)', marginBottom:'1rem' }}>Register a new site location for field operations. {role==='hod'&&<span style={{ color:'var(--primary)', fontWeight:600 }}>As Supervisor, you can register new deployment sites.</span>}</div>
+            <div style={{ fontSize:13, color:'var(--text3)', marginBottom:'1rem' }}>Register a new site location for field operations. {role=== 'regional_coordinator'&&<span style={{ color:'var(--primary)', fontWeight:600 }}>As Supervisor, you can register new deployment sites.</span>}</div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
               <Input label="Site Name *" value={siteForm.name} onChange={e=>setSiteForm(p=>({...p,name:e.target.value}))} placeholder="e.g. Huye District Office"/>
               <Input label="Location / Address *" value={siteForm.location} onChange={e=>setSiteForm(p=>({...p,location:e.target.value}))} placeholder="e.g. Huye, Southern Province"/>
@@ -342,7 +342,7 @@ export default function TeamPage() {
         {/* New Supervisor (CEO only) */}
         {adminTab==='supervisor' && role==='ceo' && (
           <div>
-            <div style={{ fontSize:13, color:'var(--text3)', marginBottom:'1rem' }}>Register a new Supervisor (Head of Operations) and assign them to a unit.</div>
+            <div style={{ fontSize:13, color:'var(--text3)', marginBottom:'1rem' }}>Register a new Regional Coordinator and assign them to a unit.</div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
               <Input label="Full Name *" value={supForm.name} onChange={e=>setSupForm(p=>({...p,name:e.target.value}))} placeholder="Full name"/>
               <Input label="Email *" type="email" value={supForm.email} onChange={e=>setSupForm(p=>({...p,email:e.target.value}))} placeholder="supervisor@saltel.rw"/>
@@ -353,11 +353,11 @@ export default function TeamPage() {
                   {allDepts.map(d=><option key={d.id} value={d.id}>{d.label}</option>)}
                 </select>
               </div>
-              <Input label="Monthly Salary (RWF)" type="number" value={supForm.salary} onChange={e=>setSupForm(p=>({...p,salary:e.target.value}))} placeholder={`Default: ${BASE_SALARIES.hod.toLocaleString()}`}/>
+              <Input label="Monthly Salary (RWF)" type="number" value={supForm.salary} onChange={e=>setSupForm(p=>({...p,salary:e.target.value}))} placeholder={`Default: ${BASE_SALARIES.regional_coordinator.toLocaleString()}`}/>
               <Input label="Studies / Education" value={supForm.studies} onChange={e=>setSupForm(p=>({...p,studies:e.target.value}))} placeholder="e.g. BSc Networks — UR"/>
             </div>
             <div style={{ marginTop:'1rem', display:'flex', justifyContent:'flex-end' }}>
-              <Btn variant="primary" onClick={handleAddSupervisor}>🏢 Register Supervisor</Btn>
+              <Btn variant="primary" onClick={handleAddSupervisor}>🏢 Register Regional Coordinator</Btn>
             </div>
           </div>
         )}
@@ -371,17 +371,17 @@ export default function TeamPage() {
                 <label style={{ display:'block', fontSize:13, fontWeight:600, color:'var(--text2)', marginBottom:5 }}>Select Staff Member *</label>
                 <select value={roleChange.userId} onChange={e=>setRoleChange(p=>({...p,userId:e.target.value}))} style={{ width:'100%', padding:'10px 14px', background:'var(--bg3)', border:'1.5px solid var(--border)', borderRadius:9, fontSize:14, color:'var(--text)' }}>
                   <option value="">— Select staff —</option>
-                  {users.filter(u=>u.id!==currentUser.id&&(role==='hod'?u.dept===currentUser.dept:true)).map(u=><option key={u.id} value={u.id}>{u.name} ({ROLE_CONFIG[u.role]?.label||u.role})</option>)}
+                  {users.filter(u=>u.id!==currentUser.id&&(role=== 'regional_coordinator'?u.dept===currentUser.dept:true)).map(u=><option key={u.id} value={u.id}>{u.name} ({ROLE_CONFIG[u.role]?.label||u.role})</option>)}
                 </select>
               </div>
               <div>
                 <label style={{ display:'block', fontSize:13, fontWeight:600, color:'var(--text2)', marginBottom:5 }}>New Role *</label>
                 <select value={roleChange.newRole} onChange={e=>setRoleChange(p=>({...p,newRole:e.target.value}))} style={{ width:'100%', padding:'10px 14px', background:'var(--bg3)', border:'1.5px solid var(--border)', borderRadius:9, fontSize:14, color:'var(--text)' }}>
                   <option value="">— Select role —</option>
-                  {Object.entries(ROLE_CONFIG).filter(([k])=>k!=='ceo').map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
+                  {Object.entries(ROLE_CONFIG).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
                 </select>
               </div>
-              {['hod','team_leader','technician'].includes(roleChange.newRole) && (
+              {['regional_coordinator','unit_leader','technician'].includes(roleChange.newRole) && (
                 <div>
                   <label style={{ display:'block', fontSize:13, fontWeight:600, color:'var(--text2)', marginBottom:5 }}>Assign to Unit</label>
                   <select value={roleChange.newDept} onChange={e=>setRoleChange(p=>({...p,newDept:e.target.value}))} style={{ width:'100%', padding:'10px 14px', background:'var(--bg3)', border:'1.5px solid var(--border)', borderRadius:9, fontSize:14, color:'var(--text)' }}>

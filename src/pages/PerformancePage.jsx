@@ -9,8 +9,8 @@ export default function PerformancePage() {
 
   // v10: Sort by score descending (best first)
   const sorted = [...performance].sort((a,b)=>b.score-a.score).filter(p => {
-    if (role==='team_leader') return users.find(u=>u.id===p.user_id)?.dept===currentUser.dept;
-    if (role==='hod') return users.find(u=>u.id===p.user_id)?.dept===currentUser.dept;
+    if (role=== 'unit_leader') return users.find(u=>u.id===p.user_id)?.dept===currentUser.dept;
+    if (role=== 'regional_coordinator') return users.find(u=>u.id===p.user_id)?.dept===currentUser.dept;
     if (role==='technician') return p.user_id===currentUser.id;
     return true;
   });
@@ -59,7 +59,7 @@ export default function PerformancePage() {
         </div>
       )}
 
-      {['ceo','hod','daf'].includes(role) && (
+      {['ceo','regional_coordinator','daf'].includes(role) && (
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem', marginBottom:'1.5rem' }}>
           {DEPT_AVERAGES.map(d=>(
             <Card key={d.dept} style={{ textAlign:'center' }}>
@@ -71,7 +71,7 @@ export default function PerformancePage() {
         </div>
       )}
 
-      <div style={{ display:'grid', gridTemplateColumns:['ceo','hod'].includes(role)?'1.5fr 1fr':'1fr', gap:'1.5rem' }}>
+      <div style={{ display:'grid', gridTemplateColumns:['ceo','regional_coordinator'].includes(role)?'1.5fr 1fr':'1fr', gap:'1.5rem' }}>
         <Card>
           <SectionTitle>🏆 Performance Rankings</SectionTitle>
           {sorted.length===0 ? <EmptyState icon="📈" title="No data"/> : sorted.map((p,i)=>{
@@ -95,7 +95,7 @@ export default function PerformancePage() {
             );
           })}
         </Card>
-        {['ceo','hod'].includes(role) && (
+        {['ceo','regional_coordinator'].includes(role) && (
           <Card>
             <SectionTitle>📊 Score Distribution</SectionTitle>
             <ResponsiveContainer width="100%" height={280}>

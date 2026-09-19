@@ -27,7 +27,7 @@ export default function WorkingPlanPage() {
 
   const allSites = sites || SITES;
   const activeDepts = [...new Set(tasks.map(t => t.dept).filter(Boolean))];
-  const activeTechs = users.filter(u => u.role === 'technician' || u.role === 'team_leader');
+  const activeTechs = users.filter(u => ['technician','unit_leader','staff','store_keeper'].includes(u.role));
 
   const todayTasks = tasks.filter(t => {
     if (!t.start_date || !t.end_date) return false;
@@ -77,8 +77,8 @@ export default function WorkingPlanPage() {
 
   const STAGE_LABELS = {
     all:'All Stages',
-    ceo_created:'Pending Supervisor',
-    hod_created:'Pending HoU',
+    ceo_created:'Pending RC',
+    hod_created:'Pending Unit Leader',
     leader_assigned:'Pending Techs',
     supervisor_approval_pending:'Awaiting Approval',
     technicians_assigned:'In Progress',
@@ -121,7 +121,7 @@ export default function WorkingPlanPage() {
           {activeDepts.map(d => <option key={d} value={d}>{d} Unit</option>)}
         </select>
 
-        {['ceo','hod'].includes(role) && (
+        {['ceo','cfo','cbo','dm','regional_coordinator'].includes(role) && (
           <select value={techFilter} onChange={e => setTechFilter(e.target.value)}
             style={{ padding:'9px 13px', border:'1.5px solid var(--border)', borderRadius:9, background:'var(--bg2)', fontSize:14, color:'var(--text)' }}>
             <option value="all">All Team Members</option>
@@ -236,14 +236,14 @@ export default function WorkingPlanPage() {
                         {hod && (
                           <div style={{ marginBottom:8, padding:'8px 12px', background:'var(--purple-l)', borderRadius:8 }}>
                             <div style={{ fontSize:12, fontWeight:700 }}>🏢 {hod.name}</div>
-                            <div style={{ fontSize:10, color:'var(--text3)', marginTop:1 }}>Supervisor</div>
+                            <div style={{ fontSize:10, color:'var(--text3)', marginTop:1 }}>Regional Coordinator</div>
                             {hod.phone && <div style={{ fontSize:11, color:'var(--purple)', fontFamily:'var(--mono)', fontWeight:600, marginTop:2 }}>📱 {hod.phone}</div>}
                           </div>
                         )}
                         {leader && (
                           <div style={{ marginBottom:6, padding:'8px 12px', background:'var(--cyan-l)', borderRadius:8 }}>
                             <div style={{ fontSize:12, fontWeight:700 }}>👑 {leader.name}</div>
-                            <div style={{ fontSize:10, color:'var(--text3)', marginTop:1 }}>HoU (Leader)</div>
+                            <div style={{ fontSize:10, color:'var(--text3)', marginTop:1 }}>Unit Leader</div>
                             {leader.phone && <div style={{ fontSize:11, color:'var(--cyan)', fontFamily:'var(--mono)', fontWeight:600, marginTop:2 }}>📱 {leader.phone}</div>}
                           </div>
                         )}
@@ -273,12 +273,12 @@ export default function WorkingPlanPage() {
                         <div style={{ fontSize:11, fontWeight:700, color:'var(--text3)', textTransform:'uppercase', letterSpacing:1, marginBottom:8 }}>Notes</div>
                         {task.hod_notes && (
                           <div style={{ marginBottom:8, padding:'8px 12px', background:'var(--bg2)', borderRadius:8, fontSize:12 }}>
-                            <span style={{ fontWeight:700, color:'var(--purple)' }}>Supervisor: </span>{task.hod_notes}
+                            <span style={{ fontWeight:700, color:'var(--purple)' }}>RC: </span>{task.hod_notes}
                           </div>
                         )}
                         {task.leader_notes && (
                           <div style={{ padding:'8px 12px', background:'var(--bg2)', borderRadius:8, fontSize:12 }}>
-                            <span style={{ fontWeight:700, color:'var(--cyan)' }}>HoU: </span>{task.leader_notes}
+                            <span style={{ fontWeight:700, color:'var(--cyan)' }}>Unit Leader: </span>{task.leader_notes}
                           </div>
                         )}
                         {!task.hod_notes && !task.leader_notes && <div style={{ fontSize:12, color:'var(--text3)' }}>No notes</div>}
